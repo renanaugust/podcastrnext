@@ -101,6 +101,13 @@ module.exports = __webpack_require__("QeBL");
 
 /***/ }),
 
+/***/ "9BML":
+/***/ (function(module, exports) {
+
+module.exports = require("date-fns");
+
+/***/ }),
+
 /***/ "F5FC":
 /***/ (function(module, exports) {
 
@@ -112,35 +119,155 @@ module.exports = require("react/jsx-runtime");
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+// ESM COMPAT FLAG
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Home; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getStaticProps", function() { return getStaticProps; });
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("F5FC");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__);
+
+// EXPORTS
+__webpack_require__.d(__webpack_exports__, "default", function() { return /* binding */ Home; });
+__webpack_require__.d(__webpack_exports__, "getStaticProps", function() { return /* binding */ getStaticProps; });
+
+// EXTERNAL MODULE: external "react/jsx-runtime"
+var jsx_runtime_ = __webpack_require__("F5FC");
+
+// EXTERNAL MODULE: external "date-fns"
+var external_date_fns_ = __webpack_require__("9BML");
+
+// EXTERNAL MODULE: external "date-fns/locale/pt-BR"
+var pt_BR_ = __webpack_require__("RvHN");
+var pt_BR_default = /*#__PURE__*/__webpack_require__.n(pt_BR_);
+
+// EXTERNAL MODULE: external "axios"
+var external_axios_ = __webpack_require__("zr5I");
+var external_axios_default = /*#__PURE__*/__webpack_require__.n(external_axios_);
+
+// CONCATENATED MODULE: ./src/services/api.ts
+
+const api = external_axios_default.a.create({
+  baseURL: 'http://localhost:3333/'
+});
+// CONCATENATED MODULE: ./src/utils/convertDurationToTimeString.ts
+function convertDurationToTimeString(duration) {
+  const hours = Math.floor(duration / 3600);
+  const minutes = Math.floor(duration % 3600 / 60);
+  const seconds = duration % 60;
+  const timeString = [hours, minutes, seconds].map(unit => String(unit).padStart(2, '0')).join(':');
+  return timeString;
+}
+// EXTERNAL MODULE: ./src/pages/home.module.scss
+var home_module = __webpack_require__("pYeR");
+var home_module_default = /*#__PURE__*/__webpack_require__.n(home_module);
+
+// CONCATENATED MODULE: ./src/pages/index.tsx
 
 
-// SPA
-// SSR
-// SSG
-function Home(props) {
-  return /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__["jsxs"])("div", {
-    children: [/*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__["jsx"])("h1", {
-      children: "Index"
-    }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__["jsx"])("p", {
-      children: JSON.stringify(props.episodes)
+
+
+
+
+
+function Home({
+  latestEpisodes,
+  allEpisodes
+}) {
+  return /*#__PURE__*/Object(jsx_runtime_["jsxs"])("div", {
+    className: home_module_default.a.homepage,
+    children: [/*#__PURE__*/Object(jsx_runtime_["jsxs"])("section", {
+      className: home_module_default.a.latestEpisodes,
+      children: [/*#__PURE__*/Object(jsx_runtime_["jsx"])("h2", {
+        children: "\xDAltimos lan\xE7amentos"
+      }), /*#__PURE__*/Object(jsx_runtime_["jsx"])("ul", {
+        children: latestEpisodes.map(episode => {
+          return /*#__PURE__*/Object(jsx_runtime_["jsxs"])("li", {
+            children: [/*#__PURE__*/Object(jsx_runtime_["jsx"])("img", {
+              src: "episode.thumbnail",
+              alt: episode.title
+            }), /*#__PURE__*/Object(jsx_runtime_["jsxs"])("div", {
+              className: home_module_default.a.episodeDetails,
+              children: [/*#__PURE__*/Object(jsx_runtime_["jsx"])("a", {
+                href: "",
+                children: episode.title
+              }), /*#__PURE__*/Object(jsx_runtime_["jsx"])("p", {
+                children: episode.members
+              }), /*#__PURE__*/Object(jsx_runtime_["jsx"])("span", {
+                children: episode.publishedAt
+              }), /*#__PURE__*/Object(jsx_runtime_["jsx"])("span", {
+                children: episode.durationAsString
+              })]
+            }), /*#__PURE__*/Object(jsx_runtime_["jsx"])("button", {
+              type: "button",
+              children: /*#__PURE__*/Object(jsx_runtime_["jsx"])("img", {
+                src: "/play-green.svg",
+                alt: "Tocar epis\xF3dio"
+              })
+            })]
+          }, episode.id);
+        })
+      })]
+    }), /*#__PURE__*/Object(jsx_runtime_["jsx"])("section", {
+      className: home_module_default.a.allEpisodes
     })]
   });
 }
-async function getStaticProps() {
-  const response = await fetch('http://localhost:3333/episodes');
-  const data = await response.json();
+const getStaticProps = async () => {
+  const {
+    data
+  } = await api.get('episodes', {
+    params: {
+      _limit: 12,
+      _sort: 'published_at',
+      _order: 'desc'
+    }
+  });
+  const episodes = data.map(episode => {
+    return {
+      id: episode.id,
+      title: episode.title,
+      thumbnail: episode.thumbnail,
+      members: episode.members,
+      publishedAt: Object(external_date_fns_["format"])(Object(external_date_fns_["parseISO"])(episode.published_at), 'd MMM yy', {
+        locale: pt_BR_default.a
+      }),
+      duration: Number(episode.file.duration),
+      durationAsString: convertDurationToTimeString(Number(episode.file.duration)),
+      description: episode.description,
+      url: episode.file.url
+    };
+  });
+  const latestEpisodes = episodes.slice(0, 2);
+  const allEpisodes = episodes.slice(2, episodes.length);
   return {
     props: {
-      episodes: data
+      latestEpisodes,
+      allEpisodes
     },
     revalidate: 60 * 60 * 8
   };
-}
+};
+
+/***/ }),
+
+/***/ "RvHN":
+/***/ (function(module, exports) {
+
+module.exports = require("date-fns/locale/pt-BR");
+
+/***/ }),
+
+/***/ "pYeR":
+/***/ (function(module, exports) {
+
+// Exports
+module.exports = {
+
+};
+
+
+/***/ }),
+
+/***/ "zr5I":
+/***/ (function(module, exports) {
+
+module.exports = require("axios");
 
 /***/ })
 
