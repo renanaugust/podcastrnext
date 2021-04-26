@@ -16,9 +16,6 @@ type Episode = {
   durationAsString: string;
   url: string;
   publishedAt: string;
-
-
-  publish_at: string;
 }
 type HomeProps = {
   latestEpisodes: Episode[];
